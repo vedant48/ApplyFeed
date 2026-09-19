@@ -32,6 +32,17 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# temporary & testing artifacts
+.playwright-mcp/
+__pycache__/
+*.py[cod]
+/scripts/
+
+# agent skills & scratch
+.agents/
+skills-lock.json
 
 # vercel
 .vercel
