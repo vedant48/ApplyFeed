@@ -72,7 +72,7 @@ ApplyFeed connects directly with your inbox (Google / Microsoft OAuth), automati
 - **Framework**: [Next.js 16](https://nextjs.org/) (App Router, Server Components & Route Handlers)
 - **Frontend**: [React 19](https://react.dev/), [Tailwind CSS v4](https://tailwindcss.com/), [Radix UI](https://www.radix-ui.com/), [Lucide React](https://lucide.dev/)
 - **State & Data Fetching**: [TanStack Query v5](https://tanstack.com/query/latest)
-- **Database & ORM**: [Drizzle ORM](https://orm.drizzle.team/) with [PostgreSQL](https://www.postgresql.org/) / [Supabase](https://supabase.com/)
+- **Backend & Database**: [Appwrite Cloud](https://appwrite.io/) (Databases, Collections, Documents & Authentication)
 - **Forms & Validation**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
 - **Testing**: [Vitest](https://vitest.dev/), Testing Library, JSDOM
 - **Package Manager**: [pnpm](https://pnpm.io/)
@@ -85,7 +85,7 @@ ApplyFeed connects directly with your inbox (Google / Microsoft OAuth), automati
 
 - Node.js `>= 20`
 - `pnpm` (`corepack enable pnpm`)
-- A PostgreSQL instance (local or Supabase)
+- An Appwrite Cloud account / project
 
 ### 2. Installation
 
@@ -106,13 +106,11 @@ cp .env.example .env.local
 Fill in your configuration keys:
 
 ```env
-# Database (Supabase or direct PostgreSQL)
-DATABASE_URL="postgresql://user:password@host:port/database?sslmode=require"
-
-# Supabase Credentials (optional for Auth/Storage)
-NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
-SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+# Appwrite Cloud Configuration
+NEXT_PUBLIC_APPWRITE_ENDPOINT="https://cloud.appwrite.io/v1"
+NEXT_PUBLIC_APPWRITE_PROJECT_ID="your-project-id"
+APPWRITE_API_KEY="standard_your-api-key"
+APPWRITE_DATABASE_ID="applyfeed"
 
 # AES-256 Token Encryption Secret (minimum 32 characters)
 ENCRYPTION_SECRET="applyinbox-secure-secret-key-32b-min!"
