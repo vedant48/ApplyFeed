@@ -1,6 +1,6 @@
 import { EmailProvider, OAuthTokens } from './provider';
 import { SyncOptions, SyncFetchResult, NormalizedEmail } from './types';
-import { cleanSnippet, stripHtml } from './normalizer';
+import { cleanSnippet, stripHtml, resolveBestBodyText } from './normalizer';
 
 // Concurrency limit for Gmail messages.get requests (bounded to prevent 429/403 rate limits)
 const CONCURRENCY_LIMIT = 3;
@@ -67,7 +67,7 @@ function decodeBase64Url(data: string): string {
 /**
  * Recursively traverses Gmail MIME parts (multipart/mixed, multipart/alternative, multipart/related).
  */
-function extractMimeBody(part: any): { plainText: string; html: string } {
+export function extractMimeBody(part: any): { plainText: string; html: string } {
   let plainText = '';
   let html = '';
 
@@ -337,7 +337,7 @@ export class GmailProvider implements EmailProvider {
 
           // Recursive MIME parsing supporting multipart/mixed, multipart/alternative, multipart/related
           const { plainText, html } = extractMimeBody(msgData.payload);
-          const bodyText = plainText || stripHtml(html) || snippet;
+          const bodyText = resolveBestBodyText(plainText, html, snippet);
           const links = extractAllLinks(html, plainText);
 
           const email: NormalizedEmail = {

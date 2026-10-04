@@ -31,4 +31,5 @@ export interface SyncStatusProgress {
 
 export interface EmailDetailData extends EmailWithAccount {
   deepLink?: string | null;
+  bodyHtml?: string | null;
 }

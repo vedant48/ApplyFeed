@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { repository } from '@/lib/db/repository';
 import { getCurrentUser, getCurrentUserId } from '@/lib/auth';
 import { getProvider } from '@/lib/email';
+import { getLiveEmailHtml } from '@/lib/email/fetch-html';
+import { isPlaceholderPlainText } from '@/lib/email/normalizer';
 import { z } from 'zod';
 
 export async function GET(
@@ -30,9 +32,19 @@ export async function GET(
       }
     }
 
+    // Attempt to load rich HTML body and auto-heal placeholder text
+    const { html, updatedBodyText } = await getLiveEmailHtml(email, user.userId, user.isDemo);
+
+    let effectiveBodyText = updatedBodyText || email.bodyText;
+    if (isPlaceholderPlainText(effectiveBodyText)) {
+      effectiveBodyText = email.snippet || effectiveBodyText;
+    }
+
     return NextResponse.json({
       email: {
         ...email,
+        bodyText: effectiveBodyText,
+        bodyHtml: html,
         deepLink,
       },
     });

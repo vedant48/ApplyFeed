@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   ExternalLink,
@@ -12,6 +12,8 @@ import {
   User,
   Briefcase,
   Layers,
+  Globe,
+  FileText,
 } from 'lucide-react';
 import { EmailDetailData } from '../types';
 import { formatExactTimestamp } from '@/lib/date-utils';
@@ -32,6 +34,21 @@ export default function EmailDetailDrawer({
   if (!isOpen || !email) return null;
 
   const formattedCategory = email.category.replace(/_/g, ' ');
+
+  // Prefer HTML view whenever rich HTML is available
+  const [viewMode, setViewMode] = useState<'html' | 'text'>('html');
+
+  useEffect(() => {
+    if (email.bodyHtml) {
+      setViewMode('html');
+    } else {
+      setViewMode('text');
+    }
+  }, [email.id, email.bodyHtml]);
+
+  // Clean fallback: If bodyText is dummy placeholder "Please Enable HTML", use the real snippet
+  const isPlaceholder = !email.bodyText || /please\s+enable\s+html/i.test(email.bodyText.trim());
+  const effectiveText = isPlaceholder ? (email.snippet || email.bodyText || 'No email body content available.') : email.bodyText;
 
   return (
     <div className="fixed inset-y-0 right-0 z-50 w-full sm:max-w-xl md:max-w-2xl bg-slate-900 border-l border-slate-800 shadow-2xl flex flex-col transition-transform duration-200 ease-in-out">
@@ -146,15 +163,68 @@ export default function EmailDetailDrawer({
           </div>
         </div>
 
-        {/* Full Email Message Content */}
-        <div className="space-y-2">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-            Email Content
+        {/* Full Email Message Content with Rich HTML & Text Toggle */}
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+              Email Content
+            </div>
+
+            {/* View Mode Toggle */}
+            <div className="inline-flex items-center rounded-lg border border-slate-800 bg-slate-950 p-0.5 text-xs">
+              <button
+                type="button"
+                onClick={() => setViewMode('html')}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
+                  viewMode === 'html'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Globe className="h-3 w-3" />
+                <span>Rich HTML</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('text')}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
+                  viewMode === 'text'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <FileText className="h-3 w-3" />
+                <span>Text View</span>
+              </button>
+            </div>
           </div>
 
-          <div className="rounded-lg border border-slate-800 bg-slate-950/90 p-4 text-xs text-slate-200 whitespace-pre-wrap leading-relaxed font-sans select-text">
-            {email.bodyText || email.snippet}
-          </div>
+          {viewMode === 'html' && email.bodyHtml ? (
+            <div className="rounded-lg border border-slate-800 bg-white overflow-hidden shadow-inner">
+              <iframe
+                title="Rich Email Preview"
+                srcDoc={email.bodyHtml}
+                sandbox="allow-popups allow-popups-to-escape-sandbox"
+                className="w-full min-h-[460px] h-[520px] border-0 bg-white"
+              />
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {viewMode === 'html' && !email.bodyHtml && (
+                <div className="text-[11px] text-slate-500 italic px-1">
+                  Rich HTML preview unavailable for this message; displaying text summary.
+                </div>
+              )}
+              {isPlaceholder && (
+                <div className="text-[11px] text-amber-400/90 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded">
+                  Showing clean snippet preview (email sender provided HTML format without plain-text fallback).
+                </div>
+              )}
+              <div className="rounded-lg border border-slate-800 bg-slate-950/90 p-4 text-xs text-slate-200 whitespace-pre-wrap leading-relaxed font-sans select-text">
+                {effectiveText}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

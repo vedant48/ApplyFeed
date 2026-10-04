@@ -9,7 +9,9 @@
     "start": "next start -p 3001",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "deploy:vercel": "node scripts/deploy-vercel.mjs",
+    "sync:env": "node scripts/sync-vercel-env.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
